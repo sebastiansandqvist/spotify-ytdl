@@ -1,0 +1,29 @@
+{
+  "name": "spotify-ytdl",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebastiansandqvist/spotify-ytdl.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sebastiansandqvist/spotify-ytdl/issues"
+  },
+  "homepage": "https://github.com/sebastiansandqvist/spotify-ytdl#readme",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "chalk": "^2.0.1",
+    "youtube-mp3-downloader": "^0.5.0",
+    "youtube-search": "^1.0.10"
+  },
+  "devDependencies": {
+    "@seabass/eslint-config": "^2.2.0",
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.1.1"
+  }
+}
