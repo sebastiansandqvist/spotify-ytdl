@@ -13,7 +13,7 @@ function makeList() {
   return blessed.list({
     label: ' Queue ',
     height: '100%',
-    width: '40%',
+    width: '30%',
     padding: 1,
     left: 0,
     top: 0,
@@ -27,9 +27,9 @@ function makeTerminal() {
   return blessed.log({
     label: ' Spotify YouTube Downloader ',
     height: '100%',
-    width: '60%',
+    width: '70%',
     padding: { left: 2, bottom: 0, top: 0, right: 0 },
-    left: '40%',
+    left: '30%',
     top: 0,
     border: { type: 'line' },
     style: { border: { fg: 'green' } },
