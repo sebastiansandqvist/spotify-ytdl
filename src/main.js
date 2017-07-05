@@ -6,6 +6,7 @@ const { makeQuery } = require('./shared');
 const renderInterface = require('./ui');
 const downloader = require('./downloader');
 const stream = require('./stream');
+const retry = require('./retry');
 
 // TODO: allow retry on failed fetch
 
@@ -34,13 +35,8 @@ function includesQuery(queue, query) {
 async function search(query) {
   const API_KEY = 'AIzaSyDw0UvCtibVbsOlnhuPu2ju1BARm3168mk';
   const opts = { key: API_KEY, maxResults: 3, type: 'video' };
-  try {
-    const results = await ytSearch(query, opts);
-    return results;
-  }
-  catch (err) { // TODO: maybe handle this error?
-    return [];
-  }
+  const results = await ytSearch(query, opts);
+  return results;
 }
 
 function main() {
@@ -123,7 +119,24 @@ function main() {
     if (!track) return;
     log.setText('');
     log.add(cyan('Searching: '), makeQuery(track), '\n');
-    results = await search(makeQuery(track));
+
+    async function doSearch() {
+      results = await search(makeQuery(track));
+    }
+
+    const MAX_RETRIES = 3;
+
+    function onRetry(count) {
+      log.add(red(`Search failed. Trying ${MAX_RETRIES - count} more time(s)`));
+    }
+
+    try { await retry(MAX_RETRIES)(doSearch, onRetry); }
+    catch (err) {
+      log.add(red('Search failed.'));
+      terminalLogs.push(red(`Error: ${err.message}`));
+      results = [];
+    }
+
     if (results.length === 0) log.add('No results found\n');
     results.forEach(function(result, i) {
       log.add(cyan(`${i + 1}.`).concat('  ').concat(result.title));
