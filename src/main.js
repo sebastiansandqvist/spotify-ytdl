@@ -71,7 +71,7 @@ function main() {
   let results = null;
 
   function download(resultIndex) {
-    const spotifyTitle = upNext.title; // upNext has metadata from Spotify
+    const spotifyTitle = upNext.value.title; // upNext has metadata from Spotify
     const selection = results[resultIndex - 1]; // selection has metadata from YouTube
     if (!selection) { return; }
     const { id, title, link } = selection;
@@ -83,7 +83,7 @@ function main() {
   function performPop() {
     queue.pop();
     list.popItem();
-    if (queue.length === 0) upNext.value = null;
+    if (queue.length === 0) upNext.set(null); // TODO: why was this upNext.value = null?
   }
 
   // Infinite read loop for input
@@ -120,22 +120,31 @@ function main() {
     log.setText('');
     log.add(cyan('Searching: '), makeQuery(track), '\n');
 
-    async function doSearch() {
-      results = await search(makeQuery(track));
-    }
-
-    const MAX_RETRIES = 3;
-
-    function onRetry(count) {
-      log.add(red(`Search failed. Trying ${MAX_RETRIES - count} more time(s)`));
-    }
-
-    try { await retry(MAX_RETRIES)(doSearch, onRetry); }
+    try { results = await search(makeQuery(track)); }
     catch (err) {
-      log.add(red('Search failed.'));
+      log.add(red('Search failed\n'));
       terminalLogs.push(red(`Error: ${err.message}`));
       results = [];
     }
+
+
+    // could do this instead, but so far searching has never failed
+    // and if it does it will probably not be something that a retry
+    // would solve:
+    // async function doSearch() {
+    //   results = await search(makeQuery(track));
+    // }
+    // const MAX_RETRIES = 3;
+    // function onRetry(count) {
+    //   log.add(red(`Search failed. Trying ${MAX_RETRIES - count} more time(s)`));
+    // }
+    // try { await retry(MAX_RETRIES)(doSearch, onRetry); }
+    // catch (err) {
+    //   log.add(red('Search failed.'));
+    //   terminalLogs.push(red(`Error: ${err.message}`));
+    //   results = [];
+    // }
+
 
     if (results.length === 0) log.add('No results found\n');
     results.forEach(function(result, i) {
