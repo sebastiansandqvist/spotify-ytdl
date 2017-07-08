@@ -1,7 +1,8 @@
 dependencies:
   blessed: 0.1.81
   chalk: 2.0.1
-  youtube-mp3-downloader: 0.5.0
+  ffmetadata: 1.4.0
+  youtube-mp3-downloader: github.com/sebastiansandqvist/youtube-mp3-downloader/a40a371dcf5974d6ce18aa055bf82f5a45a12ab7
   youtube-search: 1.0.10
 devDependencies:
   '@seabass/eslint-config': 2.2.0
@@ -164,6 +165,9 @@ packages:
     dev: true
     resolution:
       integrity: sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
+  /base64-js/0.0.2:
+    resolution:
+      integrity: sha1-Ak8Pcq+iW3X5wO5zzU9V7Bvtl4Q=
   /bcrypt-pbkdf/1.0.1:
     dependencies:
       tweetnacl: 0.14.5
@@ -178,6 +182,12 @@ packages:
       hoek: 2.16.3
     resolution:
       integrity: sha1-OciRjO/1eZ+D+UkqhI9iWt0Mdm8=
+  /bops/0.0.6:
+    dependencies:
+      base64-js: 0.0.2
+      to-utf8: 0.0.1
+    resolution:
+      integrity: sha1-CC0dVfoB5g29wuvC26N/ZZVUzzo=
   /brace-expansion/1.1.8:
     dependencies:
       balanced-match: 1.0.0
@@ -249,6 +259,11 @@ packages:
     dev: true
     resolution:
       integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
+  /concat-stream/1.0.1:
+    dependencies:
+      bops: 0.0.6
+    resolution:
+      integrity: sha1-AYsYvBx9BzotyCqkhEI0GixN158=
   /concat-stream/1.6.0:
     dependencies:
       inherits: 2.0.3
@@ -309,6 +324,9 @@ packages:
   /dom-walk/0.1.1:
     resolution:
       integrity: sha1-ZyIm3HTI95mtNTB9+TaroRrNYBg=
+  /duplexer/0.0.4:
+    resolution:
+      integrity: sha1-r8t/H4uNdPggcmFx1dZKyeSo/yA=
   /ecc-jsbn/0.1.1:
     dependencies:
       jsbn: 0.1.1
@@ -413,6 +431,15 @@ packages:
     dev: true
     resolution:
       integrity: sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
+  /ffmetadata/1.4.0:
+    dependencies:
+      concat-stream: 1.0.1
+      split: 0.2.10
+      stream-combiner: 0.0.2
+      stream-filter: 1.0.0
+      through: 2.3.8
+    resolution:
+      integrity: sha1-agAodtzwtlOnijHcqTbeXth2PFY=
   /figures/2.0.0:
     dependencies:
       escape-string-regexp: 1.0.5
@@ -970,6 +997,11 @@ packages:
   /speedometer/1.0.0:
     resolution:
       integrity: sha1-zWccsGdSwivKM3Di8zREC+T8YuI=
+  /split/0.2.10:
+    dependencies:
+      through: 2.3.8
+    resolution:
+      integrity: sha1-Zwl8YB1pfOE2j0GPBs0gHPBSGlc=
   /sprintf-js/1.0.3:
     dev: true
     resolution:
@@ -987,6 +1019,16 @@ packages:
       tweetnacl: 0.14.5
     resolution:
       integrity: sha1-US322mKHFEMW3EwY/hzx2UBzm+M=
+  /stream-combiner/0.0.2:
+    dependencies:
+      duplexer: 0.0.4
+    resolution:
+      integrity: sha1-3+DnRnV0JWXnbGBWeI6lwjvZfbQ=
+  /stream-filter/1.0.0:
+    dependencies:
+      through: 2.3.8
+    resolution:
+      integrity: sha1-PwpMbVmBAR6YYqMq/bDfFqS2ft4=
   /string-width/2.1.0:
     dependencies:
       is-fullwidth-code-point: 2.0.0
@@ -1043,7 +1085,6 @@ packages:
     resolution:
       integrity: sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
   /through/2.3.8:
-    dev: true
     resolution:
       integrity: sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
   /through2/2.0.3:
@@ -1062,6 +1103,9 @@ packages:
     dev: true
     resolution:
       integrity: sha1-uDVx+k2MJbguIxsG46MFXeTKGkc=
+  /to-utf8/0.0.1:
+    resolution:
+      integrity: sha1-0Xrqcv8vujm55DYBvns/9y4ImFI=
   /tough-cookie/2.3.2:
     dependencies:
       punycode: 1.4.1
@@ -1139,14 +1183,6 @@ packages:
   /xtend/4.0.1:
     resolution:
       integrity: sha1-pcbVMr5lbiPbgg77lDofBJmNY68=
-  /youtube-mp3-downloader/0.5.0:
-    dependencies:
-      async: 2.5.0
-      fluent-ffmpeg: 2.1.2
-      progress-stream: 2.0.0
-      ytdl-core: 0.14.4
-    resolution:
-      integrity: sha1-lgMJGaGHN+lIFF/fPIaOmNQ1LqY=
   /youtube-search/1.0.10:
     dependencies:
       request: 2.81.0
@@ -1162,6 +1198,16 @@ packages:
       sax: 1.2.4
     resolution:
       integrity: sha512-ZyTrTxldnic53O1Mp0AuQYY0TXwl7sSMsjC58GbCD1fsIPMBhu3jR8b3oBm+XghpojkNCPWd4L+YXA45F39JHQ==
+  github.com/sebastiansandqvist/youtube-mp3-downloader/a40a371dcf5974d6ce18aa055bf82f5a45a12ab7:
+    dependencies:
+      async: 2.5.0
+      fluent-ffmpeg: 2.1.2
+      progress-stream: 2.0.0
+      ytdl-core: 0.14.4
+    resolution:
+      commit: a40a371dcf5974d6ce18aa055bf82f5a45a12ab7
+      repo: 'ssh://git@github.com/sebastiansandqvist/youtube-mp3-downloader.git'
+      type: git
 registry: 'https://registry.npmjs.org/'
 shrinkwrapVersion: 3
 specifiers:
@@ -1170,5 +1216,6 @@ specifiers:
   blessed: ^0.1.81
   chalk: ^2.0.1
   eslint: ^4.1.1
-  youtube-mp3-downloader: ^0.5.0
+  ffmetadata: ^1.4.0
+  youtube-mp3-downloader: 'git+ssh://git@github.com/sebastiansandqvist/youtube-mp3-downloader.git'
   youtube-search: ^1.0.10

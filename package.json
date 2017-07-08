@@ -18,7 +18,8 @@
   "dependencies": {
     "blessed": "^0.1.81",
     "chalk": "^2.0.1",
-    "youtube-mp3-downloader": "^0.5.0",
+    "ffmetadata": "^1.4.0",
+    "youtube-mp3-downloader": "git@github.com:sebastiansandqvist/youtube-mp3-downloader.git",
     "youtube-search": "^1.0.10"
   },
   "devDependencies": {

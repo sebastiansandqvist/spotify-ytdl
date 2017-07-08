@@ -12,9 +12,9 @@ async function getMetadata() {
   return {
     album: await get('album'),
     artist: await get('artist'),
-    discNumber: Number(await get('xesam:discNumber')),
+    disc: Number(await get('xesam:discNumber')),
     title: await get('title'),
-    trackNumber: Number(await get('xesam:trackNumber')),
+    track: Number(await get('xesam:trackNumber')),
   };
 }
 

@@ -2,14 +2,12 @@ const { promisify } = require('util');
 const { fork } = require('child_process');
 const { cyan, dim, green, red } = require('chalk');
 const ytSearch = promisify(require('youtube-search'));
+const writeMetadata = promisify(require('ffmetadata').write);
 const { makeQuery } = require('./shared');
 const renderInterface = require('./ui');
 const downloader = require('./downloader');
 const stream = require('./stream');
 const retry = require('./retry');
-
-// TODO: allow retry on failed fetch
-
 
 // TODO: use cluster
 const terminalLogs = [];
@@ -44,6 +42,12 @@ async function search(query) {
   return results;
 }
 
+
+function getFilename({ artist, title }) {
+  return `[${artist}] ${title}.mp3`;
+}
+
+
 function main() {
   const { screen, list, log, textbox } = renderInterface();
 
@@ -73,16 +77,19 @@ function main() {
     }
   }
 
-  let results = null;
 
+  // includes spotify and youtube data by youtube id
+  const fullMetadata = {};
+
+  let results = null;
   function download(resultIndex) {
-    const spotifyTitle = upNext.value.title; // upNext has metadata from Spotify
     const selection = results[resultIndex - 1]; // selection has metadata from YouTube
     if (!selection) { return; }
-    const { id, title, link } = selection;
-    terminalLogs.push({ id, title, spotifyTitle, link });
+    const { id, link } = selection; // YouTube `title` could be useful too
+    terminalLogs.push(Object.assign({ id, link }, upNext.value));
+    fullMetadata[id] = { spotify: upNext.value, youtube: selection };
     results = null;
-    downloader.download(id, spotifyTitle);
+    downloader.download(id, getFilename(upNext.value));
   }
 
   function performPop() {
@@ -104,8 +111,8 @@ function main() {
         log.setText(green('Downloading...'));
         download(n);
         textbox.clearValue();
-        // the `once finished` wrapper might not be necessary
-        // does it fix the `too many redirects` bug?
+
+        // .once('finished') wrapper limits downloader to one track at a time
         downloader.once('finished', () => {
           textbox.setValue('');
           grabNextTrack();
@@ -131,24 +138,6 @@ function main() {
       terminalLogs.push(red(`Error: ${err.message}`));
       results = [];
     }
-
-
-    // could do this instead, but so far searching has never failed
-    // and if it does it will probably not be something that a retry
-    // would solve:
-    // async function doSearch() {
-    //   results = await search(makeQuery(track));
-    // }
-    // const MAX_RETRIES = 3;
-    // function onRetry(count) {
-    //   log.add(red(`Search failed. Trying ${MAX_RETRIES - count} more time(s)`));
-    // }
-    // try { await retry(MAX_RETRIES)(doSearch, onRetry); }
-    // catch (err) {
-    //   log.add(red('Search failed.'));
-    //   terminalLogs.push(red(`Error: ${err.message}`));
-    //   results = [];
-    // }
 
 
     if (results.length === 0) log.add('No results found\n');
@@ -196,6 +185,14 @@ function main() {
     screen.render();
   });
 
+  downloader.on('finished', function(err, data) {
+    if (err || !data) return void terminalLogs.push(red('Download error occurred'));
+    const metadata = fullMetadata[data.videoId];
+    if (!metadata) return void terminalLogs.push(red(`Could not get metadata for ${data.videoId} | ${data.title}`));
+    writeMetadata(getFilename(metadata.spotify), metadata.spotify)
+      .then(() => terminalLogs.push(green('Success')))
+      .catch(() => terminalLogs.push(red(`Could not set metadata for ${data.videoId} | ${data.title}`)));
+  });
 
 }
 
