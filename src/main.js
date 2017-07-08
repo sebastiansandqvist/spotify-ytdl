@@ -15,10 +15,15 @@ const retry = require('./retry');
 const terminalLogs = [];
 const listenerProcess = fork(`${__dirname}/listenerProcess.js`);
 
+function logStringified(item) {
+  if ((typeof item === 'string') || (typeof item === 'number')) console.log(item);
+  else console.log(JSON.stringify(item, null, 2));
+}
+
 
 function quit(screen) {
   screen.destroy();
-  terminalLogs.forEach((item) => console.log(JSON.stringify(item, null, 2)));
+  terminalLogs.forEach(logStringified);
   listenerProcess.kill();
   process.exit(0);
 }
@@ -158,18 +163,30 @@ function main() {
 
   upNext.map(handleNext);
 
+  function handleTrack(message) {
+    const q = makeQuery(message.data);
+    if (!upNext.value) {
+      upNext.set(message.data);
+    }
+    else if ((makeQuery(upNext.value) !== q) && !includesQuery(queue, q)) {
+      queue.push(message.data);
+      list.add(q);
+    }
+    screen.render();
+  }
+
   // Note: list element must only contain unique items
   listenerProcess.on('message', function(message) {
-    if (message.type === 'track') {
-      const q = makeQuery(message.data);
-      if (!upNext.value) {
-        upNext.set(message.data);
-      }
-      else if ((makeQuery(upNext.value) !== q) && !includesQuery(queue, q)) {
-        queue.push(message.data);
-        list.add(q);
-      }
-      screen.render();
+    switch (message.type) {
+      case 'track':
+        handleTrack(message);
+        break;
+      case 'error':
+        terminalLogs.push(red(message.errorMessage));
+        quit(screen);
+        break;
+      default:
+        terminalLogs.push(red(`Error: invalid message type ${message.type}`));
     }
   });
 

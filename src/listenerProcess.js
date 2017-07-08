@@ -3,7 +3,9 @@ const exec = promisify(require('child_process').exec);
 const { makeQuery } = require('./shared');
 
 async function get(prop) {
-  return (await exec(`playerctl metadata ${prop}`)).stdout;
+  return exec(`playerctl metadata ${prop}`)
+    .then((results) => results.stdout)
+    .catch((err) => process.send({ type: 'error', errorMessage: err.message }));
 }
 
 async function getMetadata() {
