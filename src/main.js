@@ -7,9 +7,9 @@ const { makeQuery } = require('./shared');
 const renderInterface = require('./ui');
 const downloader = require('./downloader');
 const stream = require('./stream');
-const retry = require('./retry');
+// const retry = require('./retry'); // TODO: retry failures
 
-// TODO: use cluster
+// TODO: use cluster and restart failed child process
 const terminalLogs = [];
 const listenerProcess = fork(`${__dirname}/listenerProcess.js`);
 
@@ -49,16 +49,11 @@ function getFilename({ artist, title }) {
 
 
 function main() {
+
   const { screen, list, log, textbox } = renderInterface();
 
-  // Global keybindings
-  screen.key(['escape', 'q', 'C-c', 'C-d'], function() {
-    quit(screen);
-  });
-
-  textbox.key(['C-c', 'C-d'], function() {
-    quit(screen);
-  });
+  screen.key(['escape', 'q', 'C-c', 'C-d'], () => quit(screen));
+  textbox.key(['C-c', 'C-d'], () => quit(screen));
 
   const upNext = stream();
 
@@ -78,48 +73,48 @@ function main() {
   }
 
 
-  // includes spotify and youtube data by youtube id
+  // { [youtubeId]: { title, artist, album, disc, track } }
+  // where metadata comes from spotify
   const fullMetadata = {};
 
   let results = null;
-  function download(resultIndex) {
-    const selection = results[resultIndex - 1]; // selection has metadata from YouTube
-    if (!selection) { return; }
-    const { id, link } = selection; // YouTube `title` could be useful too
-    terminalLogs.push(Object.assign({ id, link }, upNext.value));
-    fullMetadata[id] = { spotify: upNext.value, youtube: selection };
-    results = null;
-    downloader.download(id, getFilename(upNext.value));
-  }
 
   function performPop() {
     queue.pop();
     list.popItem();
-    if (queue.length === 0) upNext.set(null); // TODO: why was this upNext.value = null?
+    if (queue.length === 0) upNext.set(null);
+  }
+
+  function downloadById(videoId, metadata, cb) {
+    log.setText(green('Downloading...'));
+    textbox.clearValue();
+
+    terminalLogs.push(Object.assign({ videoId }, metadata));
+    fullMetadata[videoId] = metadata;
+    results = null;
+    downloader.download(videoId, getFilename(metadata));
+
+    // .once('finished') wrapper limits downloader to one track at a time
+    downloader.once('finished', () => cb());
   }
 
   // Infinite read loop for input
   function read() {
+
+    const onDownloadComplete = () => {
+      textbox.clearValue();
+      grabNextTrack();
+      read();
+    };
+
     textbox.readInput(function(_, command) {
       const n = parseInt(command, 10);
       if (command === 'q') quit(screen);
       else if (command === 's') grabNextTrack();
       else if (command === 'p') performPop();
-      else if (isNaN(n)) log.add(red('Unknown command: '.concat(command)));
-      else if (!results || n < 1 || n > results.length) log.add(red('Out of range'));
-      else {
-        log.setText(green('Downloading...'));
-        download(n);
-        textbox.clearValue();
-
-        // .once('finished') wrapper limits downloader to one track at a time
-        downloader.once('finished', () => {
-          textbox.setValue('');
-          grabNextTrack();
-          read();
-        });
-        return;
-      }
+      else if (command.length > 1 && upNext.value) return void downloadById(command, upNext.value, onDownloadComplete);
+      else if (results && results[n - 1] && upNext.value) return void downloadById(results[n - 1].id, upNext.value, onDownloadComplete);
+      else log.add(red('Command could not be executed'));
       textbox.clearValue();
       screen.render();
       read();
@@ -189,7 +184,7 @@ function main() {
     if (err || !data) return void terminalLogs.push(red('Download error occurred'));
     const metadata = fullMetadata[data.videoId];
     if (!metadata) return void terminalLogs.push(red(`Could not get metadata for ${data.videoId} | ${data.title}`));
-    writeMetadata(getFilename(metadata.spotify), metadata.spotify)
+    writeMetadata(getFilename(metadata), metadata)
       .then(() => terminalLogs.push(green('Success')))
       .catch(() => terminalLogs.push(red(`Could not set metadata for ${data.videoId} | ${data.title}`)));
   });

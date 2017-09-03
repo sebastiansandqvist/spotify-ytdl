@@ -2,19 +2,10 @@
   "name": "spotify-ytdl",
   "version": "1.0.0",
   "private": true,
-  "description": "",
   "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sebastiansandqvist/spotify-ytdl.git"
+  "bin": {
+    "sytdl": "index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/sebastiansandqvist/spotify-ytdl/issues"
-  },
-  "homepage": "https://github.com/sebastiansandqvist/spotify-ytdl#readme",
   "dependencies": {
     "blessed": "^0.1.81",
     "chalk": "^2.0.1",
